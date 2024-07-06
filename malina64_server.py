@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from db_requests import Database
 
 app = Flask(__name__)
@@ -10,6 +10,13 @@ def check_version():
     with Database() as db:
         result, actual_version = db.check_version(version)
     return jsonify({"result": result, "actual_version": actual_version})
+
+@app.route('/get_update', methods=['GET'])
+def get_update():
+    try:
+        return send_file('update/Malina64_Setup.exe', as_attachment=True)
+    except Exception as e:
+        return str(e), 500
 
 @app.route('/login', methods=['POST'])
 def login():
