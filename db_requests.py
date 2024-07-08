@@ -6,6 +6,8 @@ import os
 from passlib.hash import pbkdf2_sha256
 from queries import Queries
 from config import DB_USER, DB_PASSWORD, DB_PORT, DB_HOST, DB_NAME
+
+
 class Database:
     def __init__(self):
         self.connection = psycopg2.connect(
@@ -22,7 +24,6 @@ class Database:
     def __exit__(self, exc_type, exc_value, traceback):
         self.connection.close()
 
-
     def execute_query(self, query, params=None, fetchone=False, fetchall=False):
         try:
             with self.connection.cursor() as cursor:
@@ -38,7 +39,6 @@ class Database:
             self.connection.rollback()
             raise Exception(f"Ошибка работы с БД: {str(e)}")
 
-
     def check_version(self, version):
         try:
             actual_version = self.execute_query(Queries.get_version(), fetchone=True)[0]
@@ -47,7 +47,6 @@ class Database:
             return f"Необходимо обновить приложение до версии {actual_version}!", actual_version
         except Exception as e:
             return str(e)
-
 
     def register(self, username, password, role):
         try:
@@ -61,7 +60,6 @@ class Database:
         except Exception as e:
             return str(e)
 
-
     def login(self, username, password):
         try:
             user = self.execute_query(Queries.get_user_by_username(), (username,), fetchone=True)
@@ -73,7 +71,6 @@ class Database:
         except Exception as e:
             return str(e), None
 
-
     def count_row_in_DB_user_role(self):
         try:
             count_rows = self.execute_query(Queries.get_rows_user_role(), fetchone=True)[0]
@@ -81,14 +78,12 @@ class Database:
         except Exception as e:
             return str(e)
 
-
     def get_users_role(self):
         try:
             result = self.execute_query(Queries.get_users_role(), fetchall=True)
             return result
         except Exception as e:
             return str(e)
-
 
     def update_password(self, username, new_pass):
         try:
@@ -98,14 +93,12 @@ class Database:
         except Exception as e:
             return str(e)
 
-
     def update_user_role(self, username, new_role):
         try:
             self.execute_query(Queries.new_role(), (new_role, username))
             return f"Права пользователя {username} успешно изменены на {new_role}."
         except Exception as e:
             return str(e)
-
 
     def delete_user(self, username):
         try:
@@ -114,14 +107,12 @@ class Database:
         except Exception as e:
             return str(e)
 
-
     def add_log(self, date, time, log):
         try:
             self.execute_query(Queries.log_entry(), (date, time, log))
             return "Лог записан"
         except Exception as e:
             return str(e)
-
 
     def count_row_in_DB_logs(self, start_day, end_day):
         try:
@@ -130,14 +121,12 @@ class Database:
         except Exception as e:
             return str(e)
 
-
     def get_logs(self, start_day, end_day):
         try:
             result = self.execute_query(Queries.get_logs(), (start_day, end_day), fetchall=True)
             return result
         except Exception as e:
             return str(e)
-
 
     def delete_logs(self, start_day, end_day):
         try:
@@ -146,7 +135,6 @@ class Database:
         except Exception as e:
             return str(e)
 
-
     def count_row_in_DB_konditerskie(self):
         try:
             count_rows = self.execute_query(Queries.get_rows_konditerskie(), fetchone=True)[0]
@@ -154,19 +142,19 @@ class Database:
         except Exception as e:
             return str(e)
 
-
-    def register_konditerskay(self, konditerskay_name, konditerskay_type, bakery, ice_sklad, vhod_group, tualet, tables, bakery_store):
+    def register_konditerskay(self, konditerskay_name, konditerskay_type, bakery, ice_sklad, vhod_group, tualet, tables,
+                              bakery_store):
         try:
             konditerskay = self.execute_query(Queries.get_konditerskay_by_name(), (konditerskay_name,), fetchone=True)
             if konditerskay is not None:
                 return "Такая кондитерская уже существует"
             self.execute_query(Queries.register_konditerskay_in_DB(),
-                               (konditerskay_name, konditerskay_type, bakery, ice_sklad, vhod_group, tualet, tables, bakery_store))
+                               (konditerskay_name, konditerskay_type, bakery, ice_sklad, vhod_group, tualet, tables,
+                                bakery_store))
             type = 'Дисконт' if konditerskay_type == 0 else 'Магазин'
             return f"Кондитерская {konditerskay_name} типа {type} успешно зарегистрирована"
         except Exception as e:
             return str(e)
-
 
     def get_konditerskie(self):
         try:
@@ -175,8 +163,9 @@ class Database:
         except Exception as e:
             return str(e)
 
-
-    def update_konditerskay_data(self, konditerskay_name, konditerskay_type, konditerskay_bakery, konditerskay_ice_sklad, konditerskay_vhod_group, konditerskay_tualet, konditerskay_tables, konditerskay_enable, konditerskay_bakery_store):
+    def update_konditerskay_data(self, konditerskay_name, konditerskay_type, konditerskay_bakery,
+                                 konditerskay_ice_sklad, konditerskay_vhod_group, konditerskay_tualet,
+                                 konditerskay_tables, konditerskay_enable, konditerskay_bakery_store):
         try:
             self.execute_query(Queries.update_konditerskay_in_DB(),
                                (konditerskay_type, konditerskay_bakery, konditerskay_ice_sklad,
@@ -186,7 +175,6 @@ class Database:
         except Exception as e:
             return str(e)
 
-
     def check_counts_row_in_DB(self, start_day, end_day, category, query_function):
         try:
             period = DateRange(start_day, end_day)
@@ -195,7 +183,6 @@ class Database:
         except Exception as e:
             return str(e)
 
-
     def poisk_data_tovar(self, kod):
         try:
             result = self.execute_query(Queries.get_data_tovar_in_DB(), (kod,), fetchall=True)
@@ -203,14 +190,13 @@ class Database:
         except Exception as e:
             return str(e)
 
-
     def insert_data_tovar(self, kod, name, category, display, kvant, batch, koeff_ice_sklad):
         try:
-            self.execute_query(Queries.insert_data_tovar_in_DB(), (kod, name, category, display, kvant, batch, koeff_ice_sklad))
+            self.execute_query(Queries.insert_data_tovar_in_DB(),
+                               (kod, name, category, display, kvant, batch, koeff_ice_sklad))
             return "Товар успешно зарегистрирован"
         except Exception as e:
             return str(e)
-
 
     def save_prognoz(self, matrix_table_prognoz):
         self.connection.autocommit = False
@@ -218,12 +204,12 @@ class Database:
             for row in matrix_table_prognoz:
                 period_range = DateRange(row[0], row[1])
                 self.execute_query(Queries.save_prognoz_in_DB(),
-                                   (period_range, row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12]))
+                                   (period_range, row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9],
+                                    row[10], row[11], row[12]))
             self.connection.commit()
             return "Все данные успешно вставлены в базу данных"
         except Exception as e:
             return str(e)
-
 
     def update_prognoz(self, matrix_table_prognoz):
         self.connection.autocommit = False
@@ -233,12 +219,12 @@ class Database:
             self.execute_query(Queries.delete_prognoz_in_DB(), (period_range, category))
             for row in matrix_table_prognoz:
                 self.execute_query(Queries.save_prognoz_in_DB(),
-                                   (DateRange(row[0], row[1]), row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12]))
+                                   (DateRange(row[0], row[1]), row[2], row[3], row[4], row[5], row[6], row[7], row[8],
+                                    row[9], row[10], row[11], row[12]))
             self.connection.commit()
             return "Данные успешно обновлены"
         except Exception as e:
             return str(e)
-
 
     def delete_prognoz(self, start_day, end_day, category):
         try:
@@ -259,7 +245,6 @@ class Database:
             return "Все данные успешно вставлены в базу данных"
         except Exception as e:
             return str(e)
-
 
     def get_spisok_konditerskih_in_DB(self, start_day, end_day, category, query_function):
         try:
@@ -321,14 +306,12 @@ class Database:
         except Exception as e:
             return str(e)
 
-
     def count_row_in_DB_dishes(self, type_dishe):
         try:
             count_rows = self.execute_query(Queries.get_rows_dishes(), (type_dishe,), fetchone=True)[0]
             return count_rows
         except Exception as e:
             return str(e)
-
 
     def get_dishe_in_DB(self, type_dishe):
         try:
