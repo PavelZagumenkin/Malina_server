@@ -29,6 +29,17 @@ def get_update():
         return str(e), 500
 
 
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+    role = data.get('role')
+    with Database() as db:
+        result = db.register(username, password, role)
+    return jsonify({"result": result})
+
+
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json
@@ -39,17 +50,10 @@ def login():
     return jsonify({"result": result, "role": role})
 
 
-@app.route('/add_log', methods=['POST'])
-def add_log():
-    data = request.json
-    date = data.get('date')
-    time = data.get('time')
-    log = data.get('log')
-    try:
-        with Database() as db:
-            result = db.add_log(date, time, log)
-    except Exception as e:
-        return jsonify({"result": f"Ошибка сервера: {str(e)}"})
+@app.route('/count_row_in_DB_user_role', methods=['POST'])
+def count_row_in_DB_user_role():
+    with Database() as db:
+        result = db.count_row_in_DB_user_role()
     return jsonify({"result": result})
 
 
@@ -60,10 +64,53 @@ def get_users_role():
     return jsonify({"result": result})
 
 
-@app.route('/count_row_in_DB_user_role', methods=['POST'])
-def count_row_in_DB_user_role():
+@app.route('/update_password', methods=['POST'])
+def update_password():
+    data = request.json
+    username = data.get('username')
+    new_pass = data.get('new_pass')
     with Database() as db:
-        result = db.count_row_in_DB_user_role()
+        result = db.update_password(username, new_pass)
+    return jsonify({"result": result})
+
+
+@app.route('/update_user_role', methods=['POST'])
+def update_user_role():
+    data = request.json
+    username = data.get('username')
+    new_role = data.get('new_role')
+    with Database() as db:
+        result = db.update_user_role(username, new_role)
+    return jsonify({"result": result})
+
+
+@app.route('/delete_user', methods=['POST'])
+def delete_user():
+    data = request.json
+    username = data.get('username')
+    with Database() as db:
+        result = db.delete_user(username)
+    return jsonify({"result": result})
+
+
+@app.route('/add_log', methods=['POST'])
+def add_log():
+    data = request.json
+    date = data.get('date')
+    time = data.get('time')
+    log = data.get('log')
+    with Database() as db:
+        result = db.add_log(date, time, log)
+    return jsonify({"result": result})
+
+
+@app.route('/count_row_in_DB_logs', methods=['POST'])
+def count_row_in_DB_logs():
+    data = request.json
+    start_day = data.get('start_day')
+    end_day = data.get('end_day')
+    with Database() as db:
+        result = db.count_row_in_DB_logs(start_day, end_day)
     return jsonify({"result": result})
 
 
@@ -77,16 +124,6 @@ def get_logs():
     return json.dumps({"result": result}, default=default_serializer)
 
 
-@app.route('/count_row_in_DB_logs', methods=['POST'])
-def count_row_in_DB_logs():
-    data = request.json
-    start_day = data.get('start_day')
-    end_day = data.get('end_day')
-    with Database() as db:
-        result = db.count_row_in_DB_logs(start_day, end_day)
-    return jsonify({"result": result})
-
-
 @app.route('/delete_logs', methods=['POST'])
 def delete_logs():
     data = request.json
@@ -95,6 +132,7 @@ def delete_logs():
     with Database() as db:
         result = db.delete_logs(start_day, end_day)
     return jsonify({"result": result})
+
 
 
 if __name__ == '__main__':
