@@ -175,13 +175,34 @@ class Database:
         except Exception as e:
             return str(e)
 
-    def check_counts_row_in_DB(self, start_day, end_day, category, query_function):
+    def check_counts_row_in_DB(self, start_day, end_day, category, query_function_name):
         try:
             period = DateRange(start_day, end_day)
+            query_function = getattr(Queries(), query_function_name)
             result = self.execute_query(query_function(), (period, category), fetchone=True)[0]
             return result
         except Exception as e:
             return str(e)
+
+
+    def get_spisok_konditerskih_in_DB(self, start_day, end_day, category, query_function_name):
+        try:
+            period = DateRange(start_day, end_day)
+            query_function = getattr(Queries(), query_function_name)
+            intermediate_result = self.execute_query(query_function(), (period, category), fetchall=True)
+            result = [item[0] for item in intermediate_result]
+            return result
+        except Exception as e:
+            return str(e)
+
+    def delete_prognoz(self, start_day, end_day, category):
+        try:
+            period = DateRange(start_day, end_day)
+            self.execute_query(Queries.delete_prognoz_in_DB(), (period, category))
+            return "Данные успешно удалены из базы данных"
+        except Exception as e:
+            return str(e)
+
 
     def poisk_data_tovar(self, kod):
         try:
@@ -226,13 +247,7 @@ class Database:
         except Exception as e:
             return str(e)
 
-    def delete_prognoz(self, start_day, end_day, category):
-        try:
-            period = DateRange(start_day, end_day)
-            self.execute_query(Queries.delete_prognoz_in_DB(), (period, category))
-            return "Данные успешно удалены из базы данных"
-        except Exception as e:
-            return str(e)
+
 
     def save_koeff_day_week(self, matrix_table_koeff_day_week):
         self.connection.autocommit = False
@@ -246,14 +261,7 @@ class Database:
         except Exception as e:
             return str(e)
 
-    def get_spisok_konditerskih_in_DB(self, start_day, end_day, category, query_function):
-        try:
-            period = DateRange(start_day, end_day)
-            intermediate_result = self.execute_query(query_function(), (period, category), fetchall=True)
-            result = [item[0] for item in intermediate_result]
-            return result
-        except Exception as e:
-            return str(e)
+
 
     def get_spisok_category_in_DB(self):
         try:
