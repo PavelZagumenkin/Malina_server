@@ -215,5 +215,77 @@ def delete_prognoz():
         result = db.delete_prognoz(start_day, end_day, category)
     return jsonify({"result": result})
 
+
+@app.route('/save_prognoz', methods=['POST'])
+def save_prognoz():
+    data = request.json
+    matrix_table_prognoz = data.get('matrix_table_prognoz')
+    with Database() as db:
+        result = db.save_prognoz(matrix_table_prognoz)
+    return jsonify({"result": result})
+
+
+@app.route('/poisk_kod_dishe_in_DB', methods=['POST'])
+def poisk_kod_dishe_in_DB():
+    data = request.json
+    name = data.get('name')
+    with Database() as db:
+        result = db.poisk_kod_dishe_in_DB(name)
+    return jsonify({"result": result})
+
+
+@app.route('/spisok_kods_dishes_in_table', methods=['POST'])
+def spisok_names_dishes_in_DB():
+    data = request.json
+    spisok_kods_dishes_in_table = data.get('spisok_kods_dishes_in_table')
+    with Database() as db:
+        result = db.spisok_names_dishes_in_DB(spisok_kods_dishes_in_table)
+    return jsonify({"result": result})
+
+
+@app.route('/poisk_data_tovar', methods=['POST'])
+def poisk_data_tovar():
+    data = request.json
+    kods = data.get('kods')
+    results = []
+    with Database() as db:
+        for kod in kods:
+            result = db.poisk_data_tovar(kod)
+            results.append(result)
+    return jsonify({"results": results})
+
+
+@app.route('/get_spisok_category_in_DB', methods=['POST'])
+def get_spisok_category_in_DB():
+    with Database() as db:
+        result = db.get_spisok_category_in_DB()
+    return jsonify({"result": result})
+
+
+@app.route('/insert_data_tovar', methods=['POST'])
+def insert_data_tovar():
+    data = request.json
+    kod = data.get('kod')
+    name = data.get('name')
+    category = data.get('category')
+    display = data.get('display')
+    kvant = data.get('kvant')
+    batch = data.get('batch')
+    koeff_ice_sklad = data.get('koeff_ice_sklad')
+    with Database() as db:
+        result = db.insert_data_tovar(kod, name, category, display, kvant, batch, koeff_ice_sklad)
+    return jsonify({"result": result})
+
+
+@app.route('/update_name_dishe', methods=['POST'])
+def update_name_dishe():
+    data = request.json
+    kod = data.get('kod')
+    name_excel = data.get('name_excel')
+    with Database() as db:
+        result = db.update_name_dishe(kod, name_excel)
+    return jsonify({"result": result})
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

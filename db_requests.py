@@ -204,21 +204,6 @@ class Database:
             return str(e)
 
 
-    def poisk_data_tovar(self, kod):
-        try:
-            result = self.execute_query(Queries.get_data_tovar_in_DB(), (kod,), fetchall=True)
-            return result
-        except Exception as e:
-            return str(e)
-
-    def insert_data_tovar(self, kod, name, category, display, kvant, batch, koeff_ice_sklad):
-        try:
-            self.execute_query(Queries.insert_data_tovar_in_DB(),
-                               (kod, name, category, display, kvant, batch, koeff_ice_sklad))
-            return "Товар успешно зарегистрирован"
-        except Exception as e:
-            return str(e)
-
     def save_prognoz(self, matrix_table_prognoz):
         self.connection.autocommit = False
         try:
@@ -231,6 +216,67 @@ class Database:
             return "Все данные успешно вставлены в базу данных"
         except Exception as e:
             return str(e)
+
+
+    def poisk_kod_dishe_in_DB(self, name):
+        try:
+            result = self.execute_query(Queries.get_kod_dishe_in_DB(), (name,), fetchone=True)[1]
+            return result
+        except Exception as e:
+            return str(e)
+
+
+    def spisok_names_dishes_in_DB(self, spisok_kods_dishes_in_table):
+        try:
+            intermediate_result = self.execute_query(Queries.spisok_kods_dishes_in_DB(), fetchall=True)
+            intermediate_result = [row[1] for row in intermediate_result]
+            result_spisok_kods = [x for x in intermediate_result if x not in spisok_kods_dishes_in_table]
+            placeholders = ', '.join(['%s' for _ in result_spisok_kods])
+            spisok_names_in_DB = self.execute_query(Queries.spisok_name_dishes_in_DB(placeholders),
+                                                    (result_spisok_kods), fetchall=True)
+            result = [row[0] for row in spisok_names_in_DB]
+            return result
+        except Exception as e:
+            return str(e)
+
+
+    def poisk_data_tovar(self, kod):
+        try:
+            result = self.execute_query(Queries.get_data_tovar_in_DB(), (kod,), fetchall=True)
+            return result
+        except Exception as e:
+            return str(e)
+
+
+    def get_spisok_category_in_DB(self):
+        try:
+            intermediate_result = self.execute_query(Queries.get_spisok_category_in_DB(), fetchall=True)
+            result = [item[0] for item in intermediate_result]
+            return result
+        except Exception as e:
+            return str(e)
+
+
+    def insert_data_tovar(self, kod, name, category, display, kvant, batch, koeff_ice_sklad):
+        try:
+            self.execute_query(Queries.insert_data_tovar_in_DB(),
+                               (kod, name, category, display, kvant, batch, koeff_ice_sklad))
+            return "Товар успешно зарегистрирован"
+        except Exception as e:
+            return str(e)
+
+
+    def update_name_dishe(self, kod, name_excel):
+        try:
+            self.execute_query(Queries.update_name_dishe_in_DB(), (name_excel, kod))
+            return f"Наименование товара код: {kod} успешно изменено на {name_excel}."
+        except Exception as e:
+            return str(e)
+
+
+
+
+
 
     def update_prognoz(self, matrix_table_prognoz):
         self.connection.autocommit = False
@@ -263,48 +309,21 @@ class Database:
 
 
 
-    def get_spisok_category_in_DB(self):
-        try:
-            intermediate_result = self.execute_query(Queries.get_spisok_category_in_DB(), fetchall=True)
-            result = [item[0] for item in intermediate_result]
-            return result
-        except Exception as e:
-            return str(e)
 
-    def update_name_dishe(self, kod, new_name):
-        try:
-            self.execute_query(Queries.update_name_dishe_in_DB(), (new_name, kod))
-            return f"Наименование товара код: {kod} успешно изменено на {new_name}."
-        except Exception as e:
-            return str(e)
 
-    def spisok_names_dishes_in_DB(self, spisok_kods_in_table):
-        try:
-            intermediate_result = self.execute_query(Queries.spisok_kods_dishes_in_DB(), fetchall=True)
-            intermediate_result = [row[1] for row in intermediate_result]
-            result_spisok_kods = [x for x in intermediate_result if x not in spisok_kods_in_table]
-            placeholders = ', '.join(['%s' for _ in result_spisok_kods])
-            spisok_names_in_DB = self.execute_query(Queries.spisok_name_dishes_in_DB(placeholders),
-                                                    (result_spisok_kods), fetchall=True)
-            result = [row[0] for row in spisok_names_in_DB]
-            return result
-        except Exception as e:
-            return str(e)
 
-    def poisk_kod_dishe_in_DB(self, name):
-        try:
-            result = self.execute_query(Queries.get_kod_dishe_in_DB(), (name,), fetchone=True)[1]
-            return result
-        except Exception as e:
-            return str(e)
 
-    def get_prognoz_data_in_DB(self, start_day, end_day, category):
-        try:
-            period = DateRange(start_day, end_day)
-            result = self.execute_query(Queries.get_prognoz_data_in_DB(), (period, category), fetchall=True)
-            return result
-        except Exception as e:
-            return str(e)
+
+
+
+
+    # def get_prognoz_data_in_DB(self, start_day, end_day, category):
+    #     try:
+    #         period = DateRange(start_day, end_day)
+    #         result = self.execute_query(Queries.get_prognoz_data_in_DB(), (period, category), fetchall=True)
+    #         return result
+    #     except Exception as e:
+    #         return str(e)
 
     def get_koeff_day_week_data_in_DB(self, start_day, end_day, category):
         try:
