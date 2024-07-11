@@ -235,7 +235,7 @@ def poisk_kod_dishe_in_DB():
 
 
 @app.route('/spisok_kods_dishes_in_table', methods=['POST'])
-def spisok_names_dishes_in_DB():
+def spisok_kods_dishes_in_table():
     data = request.json
     spisok_kods_dishes_in_table = data.get('spisok_kods_dishes_in_table')
     with Database() as db:
@@ -251,6 +251,8 @@ def poisk_data_tovar():
     with Database() as db:
         for kod in kods:
             result = db.poisk_data_tovar(kod)
+            if not result:
+                return jsonify({"results": 'Отсутствует', "kod": kod})
             results.append(result)
     return jsonify({"results": results})
 
