@@ -181,16 +181,30 @@ def update_konditerskay_data():
     return jsonify({"result": result})
 
 
-@app.route('/check_counts_row_in_DB', methods=['POST'])
-def check_counts_row_in_DB():
+# @app.route('/check_counts_row_in_DB', methods=['POST'])
+# def check_counts_row_in_DB():
+#     data = request.json
+#     start_day = data.get('start_day')
+#     end_day = data.get('end_day')
+#     category = data.get('category')
+#     query_function_name = data.get('check_function_in_DB')
+#     with Database() as db:
+#         result = db.check_counts_row_in_DB(start_day, end_day, category, query_function_name)
+#     return jsonify({"result": result})
+
+@app.route('/check_counts_rows_in_DB', methods=['POST'])
+def check_counts_rows_in_DB():
     data = request.json
-    start_day = data.get('start_day')
-    end_day = data.get('end_day')
+    start_day = data.get('start_date')
+    end_day = data.get('end_date')
     category = data.get('category')
-    query_function_name = data.get('check_function_in_DB')
+    query_function_names = data.get('check_functions_in_DB', [])
+    results = {}
     with Database() as db:
-        result = db.check_counts_row_in_DB(start_day, end_day, category, query_function_name)
-    return jsonify({"result": result})
+        for function_name in query_function_names:
+            result = db.check_counts_row_in_DB(start_day, end_day, category, function_name)
+            results[function_name] = result
+    return jsonify({"results": results})
 
 
 @app.route('/get_spisok_konditerskih_in_DB', methods=['POST'])
